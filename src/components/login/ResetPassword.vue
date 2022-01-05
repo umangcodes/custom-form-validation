@@ -55,24 +55,41 @@
 </template>
 
 <script>
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
 export default {
   data() {
     return {
-      username: "",
+      email: "",
       validationError: [],
-      usernameRules: [
+      emailRules: [
         (value) => {
-          if (value.length <= 2) this.validationError.push("Invalid Username");
+          if (value.indexOf("@") == -1)
+            this.validationError.push("must contain @");
+          console.log(this.validationError);
+        },
+        (value) => {
+          if (value.indexOf(".") == -1)
+            this.validationError.push("must have .");
         },
       ],
     };
   },
   methods: {
     submitResetForm() {
-      return;
+      firebase
+        .auth()
+        .sendPasswordResetEmail(this.email)
+        .then(() => {
+          console
+            .log("Password reset request sent to the mentioned email address")
+            .catch((e) => {
+              console.log(`Error occured ${e.message}`);
+            });
+        });
     },
     resetForm() {
-      this.username = "";
+      this.email = "";
       this.validationError = "";
     },
     resetValidation() {
@@ -80,7 +97,7 @@ export default {
     },
     runValidation() {
       this.validationError = [];
-      this.usernameRules.forEach((func) => func(this.username));
+      this.emailRules.forEach((func) => func(this.email));
     },
   },
   created() {
