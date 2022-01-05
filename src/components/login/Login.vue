@@ -4,13 +4,13 @@
       <span class="text-4xl">Login</span>
       <form @submit.prevent="" class="flex flex-col items-center mx-5 my-5">
         <div class="">
-          <div id="username" class="flex my-10">
+          <div id="email" class="flex my-10">
             <img :src="require('@/assets/icons/user.png')" class="mx-2 h-5" />
             <input
               type="text"
-              placeholder="Username"
+              placeholder="Email"
               class="focus:border-b focus:outline-0"
-              v-model="username"
+              v-model="email"
             />
           </div>
           <div id="password" class="flex">
@@ -79,16 +79,26 @@
 </template>
 
 <script>
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
 export default {
   data() {
     return {
-      username: "",
+      email: "",
       password: "",
       passwordShow: false,
+      error: false,
+      errorMessage: "",
       validationError: [],
-      usernameRules: [
+      emailRules: [
         (value) => {
-          if (value.length <= 2) this.validationError.push("Invalid Username");
+          if (value.indexOf("@") == -1)
+            this.validationError.push("must contain @");
+          console.log(this.validationError);
+        },
+        (value) => {
+          if (value.indexOf(".") == -1)
+            this.validationError.push("must have .");
         },
       ],
 
@@ -108,22 +118,32 @@ export default {
   },
   methods: {
     submitForm() {
-      console.log(this.username);
-      console.log(this.validationError.length);
+      firebase
+        .auth()
+        .signInWithEmailAndPassword(this.email, this.password)
+        .then(() => {
+          (this.error = false),
+            (this.errorMsg = ""),
+            console.log(firebase.auth().currentUser.uid);
+        })
+        .catch((err) => {
+          (this.error = true), (this.errorMessage = err.message);
+          console.log(this.errorMessage);
+        });
     },
     togglePassword() {
       this.passwordShow = !this.passwordShow;
       console.log(this.passwordShow);
     },
     resetForm() {
-      this.username = "";
+      this.email = "";
       this.password = "";
       this.passwordShow = false;
       this.validationError = [];
     },
     runValidation() {
       this.validationError = [];
-      this.usernameRules.forEach((func) => func(this.username));
+      this.emailRules.forEach((func) => func(this.email));
       this.passwordRules.forEach((func) => func(this.password));
     },
   },
