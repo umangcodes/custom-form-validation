@@ -78,6 +78,11 @@
 </template>
 
 <script>
+// v9 compat packages are API compatible with v8 code
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/firestore";
+import db from "../../firebase/firebaseInit";
 export default {
   data() {
     return {
@@ -117,8 +122,19 @@ export default {
     };
   },
   methods: {
-    submitForm() {
-      console.log(this.username);
+    async submitForm() {
+      const firebaseAuth = await firebase.auth();
+      const createUser = await firebaseAuth.createUserWithEmailAndPassword(
+        this.email,
+        this.password
+      );
+      const res = await createUser;
+      const database = db.collection("users").doc(res.user.uid);
+      await database.set({
+        username: this.username,
+        email: this.email,
+      });
+      console.log(res);
     },
     togglePassword() {
       this.passwordShow = !this.passwordShow;
