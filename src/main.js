@@ -5,5 +5,12 @@ import router from "./router";
 import store from "./store";
 import "./assets/tailwind.css";
 // import * as mdijs from "@mdi/js";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+let app;
 
-createApp(App).use(store).use(router).mount("#app");
+firebase.auth().onAuthStateChanged(() => {
+  if (!app) {
+    createApp(App).use(store).use(router).mount("#app");
+  }
+});
