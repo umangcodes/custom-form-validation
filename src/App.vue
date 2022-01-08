@@ -6,6 +6,23 @@
   <router-view />
 </template>
 
+<script>
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+export default {
+  created() {
+    console.log("app created");
+    firebase.auth().onAuthStateChanged((user) => {
+      this.$store.commit("UPDATE_USER", user);
+      if (user) {
+        this.$store.dispatch("getCurrentUser");
+        console.log(this.$store.state.profileId);
+      }
+    });
+  },
+};
+</script>
+
 <style lang="scss">
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
